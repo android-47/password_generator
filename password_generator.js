@@ -1,13 +1,15 @@
 // author: Javier Garcia Ramirez
 // create date: R. Dec 24, 2020
 // last modified: W. Mar 24, 2021
-// filename: password-generator.js
+// filename: password_generator.js
 // description: 
 // runtime: 
 
 
-const prompt = require('prompt-sync')({sigint: true});
-
+const prompt = require('prompt-sync')({sigint: true}); // needed to prompt the user
+// quick password
+// customize
+// advanced customize
 /*
 */
 
@@ -27,6 +29,7 @@ function promptUnsignedInt(prompt_mssg, error_mssg, min_val, max_val) { // can't
 
     return test_int;
 }
+
 /*
 
 function checkInput(userInput, scenerio, testList) { // notify error or explain error
@@ -52,29 +55,16 @@ function checkInput(userInput, scenerio, testList) { // notify error or explain 
 */
 
 
-function createPassword(length, upper, lower, number, special) {
+function createPasswordAskii(length, upper, lower, number, special) {
     const password = [];
-    const typeList = [["\nUpper: "],["Lower: "],["Number: "],["Special: "]];
     const requirments = [upper, lower, number, special];
 
-
-
-    for (i = 0; i <= length-1; i++) { // include length or length-1?
-        random_number = selectType(requirments, length);
-
-
-
-        askii_code = getChar(random_number);
-        password_char = String.fromCharCode(askii_code); // convert to askii value
-        password.push(password_char);
-        typeList[random_number].push(password_char);
+    for (let i = 0; i < length; i++) {
+        random_number = selectType(requirments, length); // type could be upper, lower, number, special
+        askii_val = getChar(random_number); // gets askii vale between the range of the ...
+        password.push(askii_val);
     }
-
-
-    for (i = 0; i < 4; i++){ //  printa typelist
-        console.log(typeList[i][0], typeList[i].slice(1));
-    } 
-    return password;
+    return password; // return askii values of password
 }
 
 function selectType(list_of_req, length) {
@@ -87,7 +77,6 @@ function selectType(list_of_req, length) {
             break;
         }
     }
-    
     return type;
 }
 
@@ -118,7 +107,8 @@ function test2(range){
     return range;
 }
 
-function main() {
+
+function getRequirements() {
     const promptsList = [
     "Enter password length: ", 
     "Enter how many upper case letters: ", 
@@ -138,14 +128,52 @@ function main() {
             requirements[i] = 0; 
         }
     }
-    let length = requirements[0];
-    let upper = requirements[1];
-    let lower = requirements[2];
-    let number = requirements[3];
-    let special = requirements[4];
-    // would you like to choose char to include/? how many? prompt that many times
-    let password = createPassword(length, upper, lower, number, special);
+    return requirements;
+}
+
+function print_password(passwordAskii) {
+    const password = [];
+    let typeList = [["\nUpper: "],["Lower: "],["Number: "],["Special: "]]; // turn this to an object?
+    
+    // convert to askii char
+    for (i of passwordAskii) {
+        askii_char = String.fromCharCode(i); 
+        typeList = insertToTypeList(askii_char, typeList);
+        password.push(askii_char);
+    }
+
+    //  print typelist
+    for (i of typeList) 
+        console.log(i[0], i.slice(1));
+
     console.log ("\nPASSWORD:", password.join(""), "\n");
+}
+
+function insertToTypeList(askii_char, typeList) {
+        // add char to a list of it's type
+        if ('A' <= askii_char && askii_char <= 'Z')
+            typeList[0].push(askii_char);
+        else if ('a' <= askii_char && askii_char <= 'z')
+            typeList[1].push(askii_char);
+        else if ('0' <= askii_char && askii_char <= '9')
+            typeList[2].push(askii_char);
+        else
+            typeList[3].push(askii_char);
+        return typeList;
+}
+
+function main() {
+    let req = getRequirements();
+    let length = req[0];
+    let upper = req[1];
+    let lower = req[2];
+    let number = req[3];
+    let special = req[4];
+    // would you like to choose char to include/? how many? prompt that many times, repeat chars?
+
+    let passwordAskii = createPasswordAskii(length, upper, lower, number, special);
+    print_password(passwordAskii);
+    // print req
 }
 
 main()
