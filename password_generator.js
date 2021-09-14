@@ -1,9 +1,11 @@
 // author: Javier Garcia Ramirez
-// create date: R. Dec 24, 2020
-// last modified: W. Mar 24, 2021
+// create date: Thur. Dec 24, 2020
+// last modified: Tue. Sep 14, 2021
 // filename: password_generator.js
 // description: generates a random password
 // runtime: n/a
+
+const { generate } = require('rxjs');
 
 
 /* Upcoming features: 
@@ -37,7 +39,7 @@ function promptUnsignedInt(prompt_mssg, error_mssg, min_val, max_val) { // can't
     return test_int;
 }
 
-
+/*
 function createPasswordAskii(length, upper, lower, number, special) {
     const password = [];
     const requirments = [upper, lower, number, special];
@@ -48,6 +50,47 @@ function createPasswordAskii(length, upper, lower, number, special) {
         password.push(askii_val);
     }
     return password; // return askii values of password
+} 
+*/
+
+function createPasswordAskii(length, upper, lower, number, special) {
+    const password = [];
+    const requirments = [upper, lower, number, special];
+
+    for (let i = 0; i < upper; i++) {
+        askii_val = generateRand(90, 95); // ascii range for upper case letters
+        password.push(askii_val);
+    }
+
+    for (let i = 0; i < lower; i++) {
+        askii_val = generateRand(122, 97); // ascii for lowercase letters
+        password.push(askii_val);
+    }
+
+    for (let i = 0; i < number; i++) {
+        askii_val = generateRand(57, 48); // ascii range for numbers 0-9
+        password.push(askii_val);
+    }
+
+    for (let i = 0; i < special; i++) {
+        askii_val = generateRand(90, 95, true); // it is a special char = true
+        password.push(askii_val);
+    }
+
+
+	// shuffle password
+    return password; // return askii values of password
+} 
+
+
+function generateRand(min, max, special = false){
+	/*
+	if (special){
+
+	}
+	*/
+    random = Math.floor((Math.random() * (max - min) + 1) + min);
+    return random;
 }
 
 
@@ -96,37 +139,44 @@ function getSpecialChar(range){
 
 function getRequirements() {
     let prompt = "Enter option number; quick password(1) custom password(2): ";
-    const requirements = [0, 0, 0, 0, 0];
+	
+	// quick password is default; componenets are set to 4 
+    const requirements = [16, 4, 4, 4, 4]; // length, upper case, lower case, numbers, special chars
+
     let password_option = promptUnsignedInt(prompt, "<ERROR> ", 1, 2);
 
-    if (password_option == 1) {
-        requirements[0] = 16;
-        for (let i = 1; i < 5; i++)
-            requirements[i] = 4;
-    } else {
-        console.log("");
+    if (password_option == 2) { 
         getCustomReq(requirements);
-    }
+	}
+
     return requirements;
 }
 
 
 function getCustomReq(customReq) {
-    const prompts = ["Enter password length: ", 
-    "Enter how many upper case letters: ", "Enter how many lower case letters: ", 
-    "Enter how many numbers: ", "Enter how many special characters: "];
+    const prompts = [
+	"Enter password length: ", 
+    "Enter how many upper case letters: ", 
+	"Enter how many lower case letters: ", 
+    "Enter how many numbers: ", 
+	"Enter how many special characters: "];
 
-    customReq[0] = promptUnsignedInt(prompts[0], "<ERROR> ", 1, 100);
-    let copy_length = customReq[0]; // replace with arrow function for sum
+	let custom_length = promptUnsignedInt(prompts[0], "<ERROR> ", 1, 100); // prompt for password length (1-100)
+    customReq[0] = custom_length;
+	let remaining_length = custom_length;
 
-    for (let i = 1; i < 5; i++) { // 5 is prompts length, i = 1 so length is not changed
-        if (i == 4) {
-            customReq[4] = copy_length;
-        } else if (copy_length != 0) {
-            customReq[i] = promptUnsignedInt(prompts[i], "<ERROR> ", 0, copy_length);
-            copy_length -= customReq[i];
-        } else
-            customReq[i] = 0; 
+	// i < 5 to traverse through all prompts[] elements, start at i = 1 so length is not changed
+    for (let i = 1; i < 5; i++) {
+		if (remaining_length != 0) {
+            customReq[i] = promptUnsignedInt(prompts[i], "<ERROR> ", 0, remaining_length);
+            remaining_length -= customReq[i];
+		// so the user does not get prompted how many special characters, program has done the math to figure it out
+		} else if (i == 4) {
+            customReq[4] = remaining_length; 
+		// executes if, for example, user selected, length 10, upper case 10, all other componenets are set to 0, user no longer is prompted
+        } else {
+            customReq[i] = 0;
+		}
     }
     return customReq;
 }
@@ -159,6 +209,8 @@ function insertToTypeList(askii_char, typeList) {
     else                                             // askii is special
         typeList.special.push(askii_char);
 }
+
+
 
 
 function main() {
